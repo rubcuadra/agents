@@ -26,12 +26,12 @@ search_agent = Agent(
     model="gpt-4o-mini"
 )
 
-async def run(query: str) -> str:
-    result = await Runner.run(search_agent, query)
-    return result.final_output
-
 if __name__ == "__main__":
-    res = asyncio.run(run("""
+    async def run_agent(query: str) -> str:
+        result = await Runner.run(search_agent, query)
+        return result.final_output
+
+    res = asyncio.run(run_agent("""
         What is the ancient capital of Mexico?
     """))
     print(res)
