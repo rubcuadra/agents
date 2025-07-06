@@ -17,16 +17,17 @@ def google_search(query: str) -> str:
     """Useful for when you need more information from an online search"""
     return search.run(query)
 
-search_agent = Agent(
-    name="Search Agent",
-    instructions=SYSTEM_PROMPT,
-    tools=[google_search],
-    model="gpt-4o-mini"
-)
+def get_search_agent(model: str = "gpt-4o-mini"):
+    return Agent(
+        name="Search Agent",
+        instructions=SYSTEM_PROMPT,
+        tools=[google_search],
+        model=model
+    )
 
 if __name__ == "__main__":
     async def run_agent(query: str) -> str:
-        result = await Runner.run(search_agent, query)
+        result = await Runner.run(get_search_agent(), query)
         return result.final_output
 
     res = asyncio.run(run_agent("""

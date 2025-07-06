@@ -28,8 +28,9 @@ Pandering to elite artistic sensibilities
 </avoid>
 """
 
-orozco_agent = Agent(
-    name="JC Orozco", 
-    instructions=SYSTEM_PROMPT, 
-    model="gpt-4o-mini"
-)
+def get_orozco_agent(model: str = "gpt-4o-mini"):
+    return Agent(
+        name="JC Orozco", 
+        instructions=SYSTEM_PROMPT, 
+        model=model
+    )

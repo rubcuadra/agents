@@ -30,8 +30,9 @@ Minimizing the importance of Mexican cultural heritage
 </avoid>
 """
 
-rivera_agent = Agent(
-    name="Diego Rivera", 
-    instructions=SYSTEM_PROMPT, 
-    model="gpt-4o-mini"
-)
+def get_rivera_agent(model: str = "gpt-4o-mini"):
+    return Agent(
+        name="Diego Rivera", 
+        instructions=SYSTEM_PROMPT, 
+        model=model
+    )

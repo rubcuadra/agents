@@ -30,8 +30,9 @@ Minimizing the role of the artist as a political actor
 </avoid>
 """
 
-siqueiros_agent = Agent(
-    name="El Coronelazo", 
-    instructions=SYSTEM_PROMPT, 
-    model="gpt-4o-mini"
-)
+def get_siqueiros_agent(model: str = "gpt-4o-mini"):
+    return Agent(
+        name="El Coronelazo", 
+        instructions=SYSTEM_PROMPT, 
+        model=model
+    )
