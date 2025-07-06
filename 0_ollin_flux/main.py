@@ -58,7 +58,7 @@ async def main(topic: str, overwrite: bool = False):
         f.write(f'# {topic}\n')
         f.write(f'## Summary\n')
         f.write(result.final_output)
-        f.write(f'## Thoughts from the agents\n')
+        f.write(f'\n## Thoughts from the agents\n')
         for agent, agent_thought in zip(agents, agent_thoughts):
             f.write(f'### {agent.name}\n')
             f.write(agent_thought.final_output)
