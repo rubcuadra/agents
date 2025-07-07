@@ -35,17 +35,6 @@ class EngineeringTeam():
             verbose=True,
         )
     
-    @agent
-    def test_engineer(self) -> Agent:
-        return Agent(
-            config=self.agents_config['test_engineer'],
-            verbose=True,
-            allow_code_execution=True,
-            code_execution_mode="safe",  # Uses Docker for safety
-            max_execution_time=500, 
-            max_retry_limit=3 
-        )
-
     @task
     def design_task(self) -> Task:
         return Task(
@@ -63,12 +52,6 @@ class EngineeringTeam():
         return Task(
             config=self.tasks_config['frontend_task'],
         )
-
-    @task
-    def test_task(self) -> Task:
-        return Task(
-            config=self.tasks_config['test_task'],
-        )   
 
     @crew
     def crew(self) -> Crew:

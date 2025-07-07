@@ -36,15 +36,3 @@ frontend_task:
   context:
     - code_task
   output_file: output/app.py
-
-test_task:
-  description: >
-    Write unit tests for the given backend module {module_name} and create a test_{module_name} in the same directory as the backend module.
-  expected_output: >
-    A test_{module_name} module that tests the given backend module.
-    IMPORTANT: Output ONLY the raw Python code without any markdown formatting, code block delimiters, or backticks.
-    The output should be valid Python code that can be directly saved to a file and executed.
-  agent: test_engineer
-  context:
-    - code_task
-  output_file: output/test_{module_name}

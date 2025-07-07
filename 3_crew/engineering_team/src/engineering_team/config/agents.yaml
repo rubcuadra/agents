@@ -9,7 +9,7 @@ engineering_lead:
     The module should be named {module_name} and the class should be named {class_name}
   backstory: >
     You're a seasoned engineering lead with a knack for writing clear and concise designs.
-  llm: gpt-4o
+  llm: gpt-4-turbo
 
 
 backend_engineer:
@@ -35,13 +35,4 @@ frontend_engineer:
   backstory: >
     You're a seasoned python engineer highly skilled at writing simple Gradio UIs for a backend class.
     You produce a simple gradio UI that demonstrates the given backend class; you write the gradio UI in a module app.py that is in the same directory as the backend module {module_name}.
-  llm: anthropic/claude-3-7-sonnet-latest
-
-test_engineer:
-  role: >
-    An engineer with python coding skills who can write unit tests for the given backend module {module_name}
-  goal: >
-    Write unit tests for the given backend module {module_name} and create a test_{module_name} in the same directory as the backend module.
-  backstory: >
-    You're a seasoned QA engineer and software developer who writes great unit tests for python code.
   llm: anthropic/claude-3-7-sonnet-latest
