@@ -7,11 +7,10 @@ import tempfile
 from datetime import datetime
 import threading
 import time
-import keyboard 
+from pynput import keyboard
 
 # Global variables for controlling recording
 is_recording = False
-whisper_model = "turbo" # Consider 'base' for faster processing or 'small'/'medium' for better accuracy
 audio_buffer = []
 samplerate = 16000 # Whisper prefers 16000 Hz
 stream = None
@@ -52,28 +51,44 @@ def start_recording_threaded(max_duration):
         print(f"Error during recording: {e}")
         is_recording = False # Ensure flag is reset on error
 
-def on_space_pressed(e):
-    """Callback for spacebar press event."""
+def on_press(key):
+    """Callback for keyboard press events from pynput."""
     global is_recording, recording_thread, stop_event
 
-    if e.event_type == keyboard.KEY_DOWN and e.name == 'space':
-        if not is_recording:
-            print("Spacebar pressed. Starting recording...")
-            stop_event.clear() # Ensure stop event is clear for new recording
-            recording_thread = threading.Thread(target=start_recording_threaded, args=(10,)) # Max 10 seconds
-            recording_thread.start()
-        elif is_recording:
-            print("Spacebar pressed again. Stopping recording...")
-            stop_event.set() # Signal the recording thread to stop
-            if recording_thread and recording_thread.is_alive():
-                recording_thread.join(timeout=2) # Wait for the thread to finish cleanly
-                if recording_thread.is_alive():
-                    print("Warning: Recording thread did not terminate gracefully.")
+    try:
+        if key == keyboard.Key.space:
+            if not is_recording:
+                print("Spacebar pressed. Starting recording...")
+                stop_event.clear() # Ensure stop event is clear for new recording
+                recording_thread = threading.Thread(target=start_recording_threaded, args=(10,)) # Max 10 seconds
+                recording_thread.start()
+            elif is_recording:
+                print("Spacebar pressed again. Stopping recording...")
+                stop_event.set() # Signal the recording thread to stop
+                # Give the recording thread a moment to finish
+                if recording_thread and recording_thread.is_alive():
+                    recording_thread.join(timeout=2)
+                    if recording_thread.is_alive():
+                        print("Warning: Recording thread did not terminate gracefully.")
+        elif key == keyboard.KeyCode.from_char('q'): # Listen for 'q' to quit
+            print("Quitting...")
+            # Signal to stop any ongoing recording and then exit listener
+            if is_recording:
+                stop_event.set()
+                if recording_thread and recording_thread.is_alive():
+                    recording_thread.join(timeout=2)
+            return False # This stops the pynput keyboard listener
+    except AttributeError:
+        # Handle special keys (like space, enter, shift, etc.) which don't have a .char attribute
+        # print(f"Special key {key} pressed")
+        pass
+
 
 def transcribe_recorded_audio(filename):
     """Transcribes the audio file using Whisper."""
     print("Loading Whisper model (this may take a moment)...")
-    model = whisper.load_model(whisper_model)
+    # You can choose a different model size like 'base', 'small', 'medium', 'large'
+    model = whisper.load_model("base")
     print("Whisper model loaded.")
 
     print("Transcribing audio...")
@@ -89,14 +104,16 @@ def main():
 
     print("Press the SPACEBAR to start recording.")
     print("Press the SPACEBAR again to stop, or it will stop automatically after 10 seconds.")
-    print("Press 'q' to quit.")
+    print("Press 'q' to quit at any time.")
 
-    # Hook the spacebar listener
-    keyboard.on_press_key("space", on_space_pressed)
+    # Setup the pynput keyboard listener in the main thread
+    # The listener will call on_press for key press events
+    listener = keyboard.Listener(on_press=on_press)
+    listener.start() # Start the listener thread
 
-    # Keep the main thread alive to listen for keyboard events
+    # Keep the main thread alive to process audio and allow keyboard events
     try:
-        while True:
+        while listener.is_alive(): # Keep running as long as the listener is active
             # Check if recording has stopped and buffer needs processing
             if not is_recording and audio_buffer:
                 print("Processing recorded audio...")
@@ -125,22 +142,19 @@ def main():
                     audio_buffer.clear() # Clear buffer after processing
                     print("\nReady for next recording.")
             
-            # Allow quitting with 'q'
-            if keyboard.is_pressed('q'):
-                print("Quitting...")
-                break
-
             time.sleep(0.1) # Prevent busy-waiting
 
     except KeyboardInterrupt:
-        print("Program interrupted by user.")
+        print("Program interrupted by user (Ctrl+C).")
     finally:
-        keyboard.unhook_all() # Clean up keyboard hooks
-        if is_recording and stream and stream.active:
-            stream.stop()
-        if recording_thread and recording_thread.is_alive():
-            stop_event.set() # Signal to stop if still running
-            recording_thread.join(timeout=2)
+        # Ensure listener and recording thread are stopped on exit
+        if listener.is_alive():
+            listener.stop() # Stop the pynput listener
+        if is_recording: # If still recording, try to stop it
+            stop_event.set()
+            if recording_thread and recording_thread.is_alive():
+                recording_thread.join(timeout=2)
+        print("Exiting program.")
 
 if __name__ == "__main__":
     '''
